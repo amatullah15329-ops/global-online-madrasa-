@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b32">
+  <title>Global Online Madrasa</title>
+  <style>
+    :root{--green:#123b32;--green2:#1e6654;--gold:#d9b66f;--bg:#f3f7f5;--ink:#18332d;--muted:#71817b;--white:#fff;--line:#e2ebe6;--red:#a33b36}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Sans Bengali",sans-serif}
+    .wrap{max-width:1080px;margin:auto;padding:20px}.brand{display:flex;align-items:center;gap:12px;margin:18px 0 28px}
+    .logo{width:46px;height:46px;border-radius:15px;background:var(--green);color:var(--gold);display:grid;place-items:center;font-size:24px}
+    h1{font-size:22px;margin:0;color:var(--green)}.sub{font-size:13px;color:var(--muted);margin-top:4px}
+    .panel{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 8px 26px #123b320d}
+    .login{max-width:440px;margin:34px auto}.field{margin:15px 0}label{display:block;font-size:14px;font-weight:700;margin-bottom:7px}
+    input{width:100%;padding:13px 14px;border:1px solid #ccd9d2;border-radius:11px;font-size:15px;outline:none}
+    input:focus{border-color:var(--green2);box-shadow:0 0 0 3px #1e665418}
+    button{border:0;border-radius:11px;padding:13px 17px;background:var(--green);color:white;font-weight:700;font-size:15px;cursor:pointer}
+    button:disabled{opacity:.55;cursor:wait}.full{width:100%}.secondary{background:#eaf1ed;color:var(--green)}
+    .msg{font-size:13px;line-height:1.5;margin-top:13px;color:var(--muted);white-space:pre-wrap}.error{color:var(--red)}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.stat{padding:18px;background:#fff;border:1px solid var(--line);border-radius:16px}
+    .stat b{display:block;font-size:25px;color:var(--green);margin-top:8px}.stat span{font-size:13px;color:var(--muted)}
+    .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+    .tile{padding:18px;background:#fff;border:1px solid var(--line);border-radius:16px}.tile h3{margin:0 0 7px;font-size:16px}.tile p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .hidden{display:none!important}.notice{padding:13px 15px;border-radius:12px;background:#fff8e8;color:#71551b;font-size:13px;line-height:1.5;margin-top:16px}
+    @media(max-width:700px){.wrap{padding:15px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles{grid-template-columns:1fr 1fr}.panel{padding:18px}}
+    @media(max-width:430px){.tiles{grid-template-columns:1fr}.top h2{font-size:19px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="brand">
+      <div class="logo">۞</div>
+      <div><h1>Global Online Madrasa</h1><div class="sub">Learn • Grow • Practice</div></div>
+    </header>
+
+    <section id="loginView" class="panel login">
+      <h2 style="margin:0 0 6px;color:#123b32">স্বাগতম</h2>
+      <p class="sub">আপনার অ্যাকাউন্ট দিয়ে লগইন করুন</p>
+      <form id="loginForm">
+        <div class="field"><label for="email">ইমেইল</label><input id="email" type="email" autocomplete="username" required placeholder="আপনার ইমেইল"></div>
+        <div class="field"><label for="password">পাসওয়ার্ড</label><input id="password" type="password" autocomplete="current-password" required placeholder="পাসওয়ার্ড"></div>
+        <button id="loginBtn" class="full" type="submit">লগইন</button>
+      </form>
+      <div id="loginMsg" class="msg">প্রথমে Firebase Config বসাতে হবে।</div>
+      <div class="notice">নিরাপত্তার জন্য এখানে Public Registration রাখা হয়নি। Admin পরে Teacher ও Student account তৈরির ব্যবস্থা পাবেন।</div>
+    </section>
+
+    <section id="dashboardView" class="hidden">
+      <div class="top">
+        <div><div class="sub">GLOBAL ONLINE MADRASA</div><h2 id="welcome" style="margin:5px 0;color:#123b32">Dashboard</h2><div id="roleLabel" class="sub"></div></div>
+        <button id="logoutBtn" class="secondary">লগআউট</button>
+      </div>
+      <div id="adminStats" class="grid hidden">
+        <div class="stat"><span>মোট শিক্ষার্থী</span><b>—</b></div>
+        <div class="stat"><span>মোট শিক্ষক</span><b>—</b></div>
+        <div class="stat"><span>কোর্স</span><b>—</b></div>
+        <div class="stat"><span>সক্রিয় ক্লাস</span><b>—</b></div>
+      </div>
+      <div id="tiles" class="tiles"></div>
+      <div class="notice">এটি প্রথম ধাপের Dashboard কাঠামো। পরবর্তী ধাপে প্রতিটি মেনুর সঙ্গে Database-এর কার্যক্রম যুক্ত করা হবে।</div>
+    </section>
+  </main>
+
+  <!-- Firebase compat SDKs: script-tag setup -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase configuration for Global Online Madrasa
+    const firebaseConfig = {
+      apiKey: "AIzaSyDamigZoE2GtzfekHyyJMOVkXSHb_hhLic",
+      authDomain: "global-online-madrasa-668d4.firebaseapp.com",
+      projectId: "global-online-madrasa-668d4",
+      storageBucket: "global-online-madrasa-668d4.firebasestorage.app",
+      messagingSenderId: "257136146829",
+      appId: "1:257136146829:web:ce0628c30a6469311665c4"
+    };
+
+    const loginView = document.getElementById("loginView");
+    const dashboardView = document.getElementById("dashboardView");
+    const loginMsg = document.getElementById("loginMsg");
+    const loginBtn = document.getElementById("loginBtn");
+    let auth = null, db = null, appReady = false;
+
+    function showLogin(message = "") {
+      loginView.classList.remove("hidden");
+      dashboardView.classList.add("hidden");
+      if (message) loginMsg.textContent = message;
+    }
+    function showDashboard(user, profile) {
+      loginView.classList.add("hidden");
+      dashboardView.classList.remove("hidden");
+      document.getElementById("welcome").textContent = "আসসালামু আলাইকুম, " + (profile.name || "User");
+      document.getElementById("roleLabel").textContent = "Account: " + profile.role;
+      const stats = document.getElementById("adminStats");
+      const tiles = document.getElementById("tiles");
+      stats.classList.toggle("hidden", profile.role !== "admin");
+      const menus = {
+        admin: [["শিক্ষার্থী ব্যবস্থাপনা","শিক্ষার্থী যোগ ও পরিচালনা"],["শিক্ষক ব্যবস্থাপনা","শিক্ষক অ্যাকাউন্ট পরিচালনা"],["কোর্স","বিভাগ ও কোর্স পরিচালনা"],["লেসন","পাঠ তৈরি ও সাজানো"],["লাইভ ক্লাস","ক্লাসের সময় ও Zoom link"],["উপস্থিতি","উপস্থিতির রেকর্ড"],["অ্যাসাইনমেন্ট","কাজ ও জমা পর্যালোচনা"],["রিপোর্ট","শিক্ষার্থী অগ্রগতি"]],
+        teacher: [["আমার শিক্ষার্থী","Assigned students"],["আমার কোর্স","Assigned courses"],["লেসন","পাঠ তৈরি ও পরিচালনা"],["উপস্থিতি","ক্লাসের উপস্থিতি"],["লাইভ ক্লাস","Zoom link ও সময়"],["অ্যাসাইনমেন্ট","কাজ তৈরি ও মূল্যায়ন"],["মাসিক রিপোর্ট","শিক্ষার্থীর অগ্রগতি"],["চ্যাট","পরবর্তী ধাপে যুক্ত হবে"]],
+        student: [["আমার কোর্স","আপনার কোর্সসমূহ"],["লেসন","পাঠ পড়ুন"],["অ্যাসাইনমেন্ট","নির্ধারিত কাজ"],["লাইভ ক্লাস","ক্লাসের সময়সূচি"],["উপস্থিতি","আপনার উপস্থিতি"],["আমার অগ্রগতি","শেখার অগ্রগতি"],["নোটিশ","মাদ্রাসার ঘোষণা"],["প্রোফাইল","আপনার তথ্য"]]
+      };
+      tiles.innerHTML = "";
+      (menus[profile.role] || []).forEach(([title,desc]) => {
+        const el = document.createElement("article");
+        el.className = "tile";
+        const h = document.createElement("h3"); h.textContent = title;
+        const p = document.createElement("p"); p.textContent = desc;
+        el.append(h,p); tiles.append(el);
+      });
+    }
+    function initFirebase() {
+      const vals = Object.values(firebaseConfig);
+      if (vals.some(v => String(v).startsWith("PASTE_"))) {
+        loginMsg.textContent = "Firebase Config এখনো বসানো হয়নি। Config-এর মান বসানোর পর Login চালু হবে।";
+        return;
+      }
+      try {
+        firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        appReady = true;
+        auth.onAuthStateChanged(async user => {
+          if (!user) { showLogin("আপনার ইমেইল ও পাসওয়ার্ড দিয়ে লগইন করুন।"); return; }
+          try {
+            const snap = await db.collection("users").doc(user.uid).get();
+            if (!snap.exists) {
+              await auth.signOut();
+              showLogin("এই অ্যাকাউন্টের Profile পাওয়া যায়নি। Admin-এর সঙ্গে যোগাযোগ করুন।");
+              return;
+            }
+            const profile = snap.data();
+            if (!["admin","teacher","student"].includes(profile.role) || profile.status !== "active") {
+              await auth.signOut();
+              showLogin("এই অ্যাকাউন্টের Role বা Status সঠিক নয়। Admin-এর সঙ্গে যোগাযোগ করুন।");
+              return;
+            }
+            showDashboard(user, profile);
+          } catch (e) {
+            await auth.signOut();
+            showLogin("Profile পড়া যায়নি। Firestore Security Rules পরীক্ষা করতে হবে। Error: " + e.message);
+          }
+        });
+      } catch (e) { loginMsg.textContent = "Firebase চালু করা যায়নি: " + e.message; }
+    }
+    document.getElementById("loginForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (!appReady) { loginMsg.textContent = "আগে Firebase Config বসাতে হবে।"; return; }
+      loginBtn.disabled = true;
+      loginMsg.textContent = "লগইন হচ্ছে...";
+      try {
+        await auth.signInWithEmailAndPassword(
+          document.getElementById("email").value.trim(),
+          document.getElementById("password").value
+        );
+      } catch (e) {
+        loginMsg.textContent = "লগইন হয়নি: " + e.message;
+      } finally { loginBtn.disabled = false; }
+    });
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      if (auth) await auth.signOut();
+      showLogin("আপনি লগআউট করেছেন।");
+    });
+    initFirebase();
+  </script>
+</body>
+</html>
